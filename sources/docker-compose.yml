@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+    db:
+        image: mysql:5.7
+        container_name: mysql_c
+        restart: always
+        volumes:
+            - db-volume:/var/lib/mysql
+            - ./db/articles.sql:/docker-entrypoint-initdb.d/articles.sql
+        environment:
+            MYSQL_ROOT_PASSWORD: test
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+    app:
+        image: myapp
+        container_name: myapp_c
+        restart: always
+        build:
+            context: ./
+            args:
+              - PHP_VERSION
+        volumes:
+            - ./app:/var/www/html
+        environment:
+            MYSQL_HOST: ${MYSQL_HOST}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        ports:
+            - 8080:80
+        depends_on:
+            - db
+
+volumes:
+    db-volume:
